@@ -13,10 +13,16 @@ log() {
 log "Current directory: $(pwd)"
 log "Starting Flutter installation and build process..."
 
+# curl আছে কিনা চেক করা
+if ! command -v curl &> /dev/null; then
+  log "Error: curl is not installed. Please ensure curl is available in the build environment."
+  exit 1
+fi
+
 # Flutter SDK ডাউনলোড
 FLUTTER_VERSION="3.13.9-stable"
 log "Downloading Flutter SDK version $FLUTTER_VERSION..."
-wget -q https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_${FLUTTER_VERSION}.tar.xz
+curl -o flutter_linux_${FLUTTER_VERSION}.tar.xz https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_${FLUTTER_VERSION}.tar.xz
 log "Flutter SDK download completed"
 
 # Flutter SDK এক্সট্র্যাক্ট

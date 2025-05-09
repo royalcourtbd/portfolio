@@ -5,8 +5,11 @@
         "src": "build.sh",
         "use": "@vercel/static-build",
         "config": {
-          "distDir": "build/web"
+          "distDir": "build/web",
+          "installCommand": "echo 'Skipping install, handled in build.sh'",
+          "buildCommand": "./build.sh"
         }
       }
-    ]
+    ],
+    "outputDirectory": "build/web"
   }
