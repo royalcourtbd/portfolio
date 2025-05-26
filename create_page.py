@@ -2,8 +2,7 @@
 import os
 import re
 import sys
-import yaml # type: ignore
-
+import yaml
 # Colors for output
 RED = '\033[0;31m'
 GREEN = '\033[0;32m'
