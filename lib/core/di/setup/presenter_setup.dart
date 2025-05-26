@@ -13,8 +13,6 @@ class PresenterSetup implements SetupModule {
   Future<void> setup() async {
     _serviceLocator
       ..registerFactory(() => loadPresenter(MainPresenter(locate())))
-      ..registerLazySingleton(
-        () => loadPresenter(HomePresenter(locate(), locate())),
-      );
+      ..registerLazySingleton(() => loadPresenter(HomePresenter()));
   }
 }

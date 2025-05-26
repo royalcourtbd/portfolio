@@ -1,4 +1,4 @@
-import 'package:portfolio/presentation/portfolio_home_page.dart';
+import 'package:portfolio/presentation/home/ui/home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:get/route_manager.dart';
 import 'package:portfolio/core/config/app_screen.dart';
@@ -33,9 +33,9 @@ class InitialApp extends StatelessWidget {
           theme: AappTheme.lightTheme,
 
           title: 'Initial Project',
+
           // home: isFirstRun ? OnboardingPage() : MainPage(),
-          home: PortfolioHomePage(),
-          // home: MainPage(),
+          home: HomePage(),
         );
       },
     );

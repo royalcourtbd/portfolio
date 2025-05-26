@@ -56,6 +56,25 @@ def display_apk_size():
     else:
         print(f"{RED}APK file not found at {apk_path}{NC}")
 
+def display_web_build_info():
+    """Function to display web build information"""
+    web_path = "build/web"
+    
+    if os.path.isdir(web_path):
+        # Calculate total size of web build
+        total_size = 0
+        for dirpath, dirnames, filenames in os.walk(web_path):
+            for filename in filenames:
+                filepath = os.path.join(dirpath, filename)
+                total_size += os.path.getsize(filepath)
+        
+        # Convert to megabytes
+        size_mb = round(total_size / 1048576, 2)
+        print(f"{BLUE}Web Build Size: {size_mb} MB{NC}")
+        print(f"{BLUE}Web Build Location: {web_path}{NC}")
+    else:
+        print(f"{RED}Web build directory not found at {web_path}{NC}")
+
 def open_directory(directory_path):
     """Opens a directory based on the operating system"""
     try:
@@ -155,6 +174,103 @@ def build_aab():
     
     # Open the AAB directory
     open_directory("build/app/outputs/bundle/release/")
+
+def build_web():
+    """Build Web (Full Process)"""
+    print(f"{YELLOW}Building Web Application...{NC}\n")
+    
+    # Clean the project
+    process = subprocess.Popen(
+        ["flutter", "clean"],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE
+    )
+    if not show_loading("Cleaning project...                                   ", process):
+        print(f"{RED}Failed to clean project. Aborting web build.{NC}")
+        return
+    
+    # Get dependencies
+    process = subprocess.Popen(
+        ["flutter", "pub", "get"],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE
+    )
+    if not show_loading("Getting dependencies...                              ", process):
+        print(f"{RED}Failed to get dependencies. Aborting web build.{NC}")
+        return
+    
+    # Generate build files (optional step, might not be needed for web)
+    process = subprocess.Popen(
+        ["dart", "run", "build_runner", "build", "--delete-conflicting-outputs"],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE
+    )
+    show_loading("Generating build files...                            ", process)
+    # Continue even if this fails as it might not be required for web
+    
+    # Generate localizations (optional step)
+    process = subprocess.Popen(
+        ["flutter", "gen-l10n"],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE
+    )
+    show_loading("Generating localizations...                          ", process)
+    # Continue even if this fails
+    
+    # Build Web - start with basic command first
+    process = subprocess.Popen(
+        ["flutter", "build", "web", "--release"],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE
+    )
+    web_build_success = show_loading("Building Web Application...                          ", process)
+    
+    if web_build_success:
+        print(f"\n{GREEN}✓ Web application built successfully!{NC}")
+        
+        # Display web build information
+        display_web_build_info()
+        
+        # Open the web build directory
+        open_directory("build/web/")
+    else:
+        print(f"\n{RED}✗ Web build failed!{NC}")
+        print(f"{YELLOW}Trying to get error details...{NC}")
+        
+        # Try to get error output
+        try:
+            stdout, stderr = process.communicate()
+            if stderr:
+                print(f"{RED}Error output:{NC}")
+                print(stderr.decode('utf-8'))
+            if stdout:
+                print(f"{YELLOW}Build output:{NC}")
+                print(stdout.decode('utf-8'))
+        except Exception as e:
+            print(f"{RED}Could not retrieve error details: {e}{NC}")
+        
+        # Try alternative web build command
+        print(f"\n{YELLOW}Trying alternative web build command...{NC}")
+        process = subprocess.Popen(
+            ["flutter", "build", "web"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
+        )
+        alt_success = show_loading("Building Web (alternative)...                        ", process)
+        
+        if alt_success:
+            print(f"\n{GREEN}✓ Web application built successfully with alternative command!{NC}")
+            display_web_build_info()
+            open_directory("build/web/")
+        else:
+            print(f"\n{RED}✗ Alternative web build also failed!{NC}")
+            try:
+                stdout, stderr = process.communicate()
+                if stderr:
+                    print(f"{RED}Error output:{NC}")
+                    print(stderr.decode('utf-8'))
+            except:
+                pass
 
 def generate_lang():
     """Generate localization files"""
@@ -393,12 +509,57 @@ def create_page(page_name):
         print("Make sure it exists and is executable in the current directory.")
         sys.exit(1)
 
+def check_flutter_web_support():
+    """Check if Flutter web is properly configured"""
+    print(f"{YELLOW}Checking Flutter Web Support...{NC}\n")
+    
+    # Check Flutter version
+    process = subprocess.Popen(
+        ["flutter", "--version"],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE
+    )
+    show_loading("Checking Flutter version...                          ", process)
+    
+    # Check if web is enabled
+    process = subprocess.Popen(
+        ["flutter", "config", "--enable-web"],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE
+    )
+    show_loading("Enabling Flutter web support...                      ", process)
+    
+    # Check available devices/platforms
+    process = subprocess.Popen(
+        ["flutter", "devices"],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE
+    )
+    show_loading("Checking available platforms...                      ", process)
+    
+    try:
+        stdout, stderr = process.communicate()
+        if stdout:
+            output = stdout.decode('utf-8')
+            if 'Chrome' in output or 'Web Server' in output:
+                print(f"{GREEN}✓ Web support detected in Flutter devices{NC}")
+            else:
+                print(f"{RED}✗ Web support not found in Flutter devices{NC}")
+                print(f"{YELLOW}Available devices:{NC}")
+                print(output)
+    except:
+        pass
+    
+    print(f"\n{GREEN}✓ Flutter web support check completed{NC}")
+
 def show_usage():
     """Show usage information"""
     print(f"{YELLOW}Usage: {sys.argv[0]} [command]{NC}")
     print("\nAvailable commands:")
     print("  apk          Build release APK (Full Process)")
     print("  aab          Build release AAB")
+    print("  web          Build release Web Application")
+    print("  web-check    Check Flutter web support configuration")
     print("  lang         Generate localization files")
     print("  db           Run build_runner")
     print("  setup        Perform full project setup")
@@ -414,6 +575,7 @@ def main():
     # Create required directories if they don't exist
     os.makedirs("build/app/outputs/flutter-apk", exist_ok=True)
     os.makedirs("build/app/outputs/bundle/release", exist_ok=True)
+    os.makedirs("build/web", exist_ok=True)
     
     if len(sys.argv) < 2:
         show_usage()
@@ -424,6 +586,10 @@ def main():
         build_apk()
     elif command == "aab":
         build_aab()
+    elif command == "web":
+        build_web()
+    elif command == "web-check":
+        check_flutter_web_support()
     elif command == "lang":
         generate_lang()
     elif command == "db":
