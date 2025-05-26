@@ -1,5 +1,3 @@
-import 'package:portfolio/presentation/dua/presenter/dua_presenter.dart';
-import 'package:portfolio/presentation/settings/presenter/settings_presenter.dart';
 import 'package:get_it/get_it.dart';
 import 'package:portfolio/core/base/base_presenter.dart';
 import 'package:portfolio/core/di/service_locator.dart';
@@ -17,12 +15,6 @@ class PresenterSetup implements SetupModule {
       ..registerFactory(() => loadPresenter(MainPresenter(locate())))
       ..registerLazySingleton(
         () => loadPresenter(HomePresenter(locate(), locate())),
-      )
-      ..registerLazySingleton(
-        () => loadPresenter(SettingsPresenter(locate(), locate())),
-      )
-      ..registerLazySingleton(
-        () => loadPresenter(DuaPresenter(locate(), locate(), locate())),
       );
   }
 }

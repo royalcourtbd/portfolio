@@ -1,5 +1,3 @@
-import 'package:portfolio/presentation/dua/ui/all_dua_page.dart';
-import 'package:portfolio/presentation/settings/ui/settings_page.dart';
 import 'package:flutter/material.dart';
 import 'package:portfolio/core/di/service_locator.dart';
 import 'package:portfolio/core/external_libs/presentable_widget_builder.dart';
@@ -13,12 +11,7 @@ class MainPage extends StatelessWidget {
   MainPage({super.key});
   final MainPresenter _mainPresenter = locate<MainPresenter>();
 
-  final List<Widget> _pages = <Widget>[
-    HomePage(),
-    AllDuaPage(),
-    HomePage(),
-    SettingsPage(),
-  ];
+  final List<Widget> _pages = <Widget>[HomePage(), HomePage()];
 
   @override
   Widget build(BuildContext context) {

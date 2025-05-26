@@ -19,7 +19,6 @@ import 'package:portfolio/core/utility/trial_utility.dart';
 import 'package:responsive_sizer/responsive_sizer.dart' as rs;
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 bool get isMobile => rs.Device.screenType == rs.ScreenType.mobile;
 const String _fileName = "utility.dart";
@@ -158,10 +157,6 @@ Future<bool> checkInternetConnection() async {
     return true;
   });
   return isConnected ?? false;
-}
-
-extension LocalizationExtension on BuildContext {
-  AppLocalizations get l10n => AppLocalizations.of(this)!;
 }
 
 Future<void> copyText({required String text}) async {
