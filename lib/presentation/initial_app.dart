@@ -50,8 +50,8 @@ class InitialApp extends StatelessWidget {
           locale: settingsPresenter.getSelectedLanguageLocale(currentLanguage),
           title: 'Initial Project',
           // home: isFirstRun ? OnboardingPage() : MainPage(),
-          // home: SettingsPage(),
-          home: MainPage(),
+          home: PortfolioHomePage(),
+          // home: MainPage(),
         );
       },
     );
